@@ -16,22 +16,20 @@
 
 
 #define DEFAULT_BUFLEN 512
-#define DEFAULT_PORT "8080"
-#define IP_ADDR "172.24.47.142"
+#define DEFAULT_PORT "36"
+#define IP_ADDR "123.253.35.37"
 
 WSADATA wsaData;
 SOCKET ConnectSocket = INVALID_SOCKET;
-DWORD   dwThreadIdArray;
+DWORD   dwThreadIdArray1, dwThreadIdArray2;
 
-DWORD WINAPI ListeningThread( LPVOID lpParam );
+DWORD WINAPI ReadingThread( LPVOID lpParam );
+DWORD WINAPI WritingThread( LPVOID lpParam );
 
 int __cdecl main(int argc, char **argv) 
 {
-    char recvbuf[DEFAULT_BUFLEN];
     int iResult;
-    int recvbuflen = DEFAULT_BUFLEN;
-    int count = 0;
-    char sendbuf[50];
+    HANDLE hThread1,hThread2;
     struct addrinfo *result = NULL,*ptr = NULL,hints;
 
     // Initialize Winsock
@@ -85,26 +83,11 @@ int __cdecl main(int argc, char **argv)
     }
     printf("Connection Succeded\n");
 
-    CreateThread(NULL,0,ListeningThread,NULL,0,&dwThreadIdArray);
+    hThread1 =CreateThread(NULL,0,WritingThread,NULL,0,&dwThreadIdArray1);
+    hThread2 =CreateThread(NULL,0,ReadingThread,NULL,0,&dwThreadIdArray2);
 
-    // Send an initial buffer
-    while(1)
-    {
 
-        gets(sendbuf);
-
-        iResult = send( ConnectSocket, sendbuf, (int)strlen(sendbuf), 0 );
-        memset(sendbuf,0,sizeof(sendbuf));
-
-        if (iResult == SOCKET_ERROR) {
-            printf("send failed with error: %d\n", WSAGetLastError());
-            closesocket(ConnectSocket);
-            WSACleanup();
-            return 1;
-        }
-
-    }
-
+    WaitForSingleObject(hThread2,INFINITE);
     // cleanup
     closesocket(ConnectSocket);
     WSACleanup();
@@ -112,11 +95,11 @@ int __cdecl main(int argc, char **argv)
     return 0;
 }
 
-DWORD WINAPI ListeningThread( LPVOID lpParam ) 
+DWORD WINAPI ReadingThread( LPVOID lpParam ) 
 { 
     int readStatus = 1;
     char serMsg[DEFAULT_BUFLEN];
-    printf("Thread Created\n");
+    printf("Thread Created for read\n");
     while(1)
     {
        memset(serMsg, 0, (255*sizeof(char)));
@@ -130,6 +113,27 @@ DWORD WINAPI ListeningThread( LPVOID lpParam )
         }
        printf("%s\n",serMsg);
     }
+    return 0; 
+}
 
+DWORD WINAPI WritingThread( LPVOID lpParam ) 
+{ 
+    int writeStatus = 1;
+    char sendbuf[DEFAULT_BUFLEN];
+    printf("Thread Created for write\n");
+    while(1)
+    {
+        gets(sendbuf);
+
+        writeStatus = send( ConnectSocket, sendbuf, (int)strlen(sendbuf), 0 );
+        memset(sendbuf,0,sizeof(sendbuf));
+
+        if (writeStatus == SOCKET_ERROR) {
+            printf("send failed with error: %d\n", WSAGetLastError());
+            closesocket(ConnectSocket);
+            WSACleanup();
+            return 1;
+        }
+    }
     return 0; 
 } 

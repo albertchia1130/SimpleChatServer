@@ -8,6 +8,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <sys/time.h>
+#include <syslog.h>
 
 #define messageSize 255
 
@@ -33,6 +34,7 @@ int main(int argc, char const* argv[])
   
     // create server socket similar to what was done in 
     // client program 
+    openlog("Logs", LOG_PID, LOG_USER);
     servSockD = socket(AF_INET, SOCK_STREAM, 0); 
 
     // string store data to send to client 
@@ -53,11 +55,13 @@ int main(int argc, char const* argv[])
     printf("phase 1\n");
     listen(servSockD, SOMAXCONN); 
     printf("Entering Listen\n");
+    syslog(LOG_INFO, "Entering Listen");
     
     // send's messages to client socket 
     while(1)
     {
         clientSocket = accept(servSockD, NULL, NULL);
+        syslog(LOG_INFO, "New User");
         printf("A new connection\n");
         CreateNAttachClient(clientSocket); //Attach client Socket to the list
     }
