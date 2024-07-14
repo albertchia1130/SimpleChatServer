@@ -34,14 +34,7 @@ int main(int argc, char const* argv[])
   
     // create server socket similar to what was done in 
     // client program 
-    openlog("Logs", LOG_PID, LOG_USER);
     servSockD = socket(AF_INET, SOCK_STREAM, 0); 
-
-    // string store data to send to client 
-    char serMsg[messageSize];
-    printf("Hello\n");
-
-  
     // define server address 
     struct sockaddr_in servAddr; 
   
@@ -55,7 +48,6 @@ int main(int argc, char const* argv[])
     printf("phase 1\n");
     listen(servSockD, SOMAXCONN); 
     printf("Entering Listen\n");
-    syslog(LOG_INFO, "Entering Listen");
     
     // send's messages to client socket 
     while(1)
