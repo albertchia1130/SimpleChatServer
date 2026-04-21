@@ -39,7 +39,7 @@ int main(int argc, char const* argv[])
     struct sockaddr_in servAddr; 
   
     servAddr.sin_family = AF_INET; 
-    servAddr.sin_port = htons(36); 
+    servAddr.sin_port = htons(8080); 
   
     // bind socket to the specified IP and port 
     bind(servSockD, (struct sockaddr*)&servAddr, sizeof(servAddr)); 
@@ -147,12 +147,10 @@ void BroadcastMessage(int user, char* Message)
     char SendMessage[50];
     sprintf(SendMessage, "user %d sent: ",user);
     strcat(SendMessage,Message);
-    printf("test code\n");
     while(Index != NULL)
     {
-        printf("test code2\n");
+
         send( Index->ClientID, SendMessage, strlen(SendMessage), 0 );
-        printf("Message Sent\n");
         if (Index->nextClient ==NULL)
         {
             break;
