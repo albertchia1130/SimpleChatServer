@@ -22,9 +22,9 @@ typedef struct ClientAttr{
 
 }Client_number;
 
-int CreateNAttachClient(int clientSocket);
-int FreeNDetachClient(Client_number* Client);
-void BroadcastMessage(int user, char* Message);
+int CreateNAttachClient(int clientSocket); //Create a thread for each client attached
+int FreeNDetachClient(Client_number* Client); //Exit thread and free up resource when client exit
+void BroadcastMessage(int user, char* Message); //broadcast message received from a client to all subscriber
 static void* ClientMessageFunc(void *arg);
 
 Client_number* HeadListofClient; //Starting point of client list;
