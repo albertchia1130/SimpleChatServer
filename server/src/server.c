@@ -12,10 +12,6 @@
 
 #define messageSize 255
 
-int ClientIndex = 0;
-int clientSocket =0;
-int servSockD;
-
 typedef struct ClientAttr{
     struct ClientAttr* nextClient;
     int ClientID;
@@ -31,10 +27,10 @@ Client_number* HeadListofClient; //Starting point of client list;
   
 int main(int argc, char const* argv[]) 
 { 
-  
+    int clientSocket =0;
     // create server socket similar to what was done in 
     // client program 
-    servSockD = socket(AF_INET, SOCK_STREAM, 0); 
+    int servSockD = socket(AF_INET, SOCK_STREAM, 0); 
     // define server address 
     struct sockaddr_in servAddr; 
   
@@ -84,25 +80,30 @@ static void* ClientMessageFunc(void *arg)
 int CreateNAttachClient(int clientSocket)
 {
     pthread_t thread_id;
+    int number= 0;
     Client_number* ClientNumber;
     Client_number* Index = HeadListofClient;
-    ClientNumber = (Client_number *)malloc(sizeof(Client_number));
+    ClientNumber = (Client_number *)calloc(1,sizeof(Client_number));
     ClientNumber->ClientID = clientSocket;
     if(Index == NULL)
     {
+        printf("Attached at head\n");
         HeadListofClient = ClientNumber; //Attached to the list
     }
     else
     {
         while(Index != NULL)
         {
+            number++;
             if (Index->nextClient ==NULL)
             {
+                printf("Attached at %d\n", number);
                 Index->nextClient = ClientNumber; //Attach Client to the list.
                 break;
             }
             else
             {
+                printf("loop at %d\n", number);
                 Index  = Index->nextClient;
             }
         }
@@ -149,7 +150,7 @@ void BroadcastMessage(int user, char* Message)
     strcat(SendMessage,Message);
     while(Index != NULL)
     {
-
+        printf("messageSent\n");
         send( Index->ClientID, SendMessage, strlen(SendMessage), 0 );
         if (Index->nextClient ==NULL)
         {

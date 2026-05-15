@@ -13,7 +13,7 @@
 
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT 8080
-#define IP_ADDR "192.168.10.106"
+#define IP_ADDR "15.135.218.253"
 
 int ConnectSocket;
 
