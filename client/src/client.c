@@ -13,12 +13,12 @@
 
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT 8080
-#define IP_ADDR "15.135.218.253"
 
 int ConnectSocket;
 
 static void*  ReadingThread(void *arg);
 static void*  WritingThread(void *arg);
+void PromtForServer(char * ipaddr);
 
 int main() 
 {
@@ -28,23 +28,24 @@ int main()
     struct sockaddr_in servAddr;
     char ipaddress[DEFAULT_BUFLEN];
 
-
-    printf("input ip of the server:");
-    fgets(ipaddress, DEFAULT_BUFLEN, stdin);
-
-
     ConnectSocket = socket(AF_INET, SOCK_STREAM, 0);
-    servAddr.sin_family = AF_INET;
-    servAddr.sin_port= htons(DEFAULT_PORT); // use some unused port number
-    servAddr.sin_addr.s_addr = inet_addr(IP_ADDR);
 
-    // Connect to server.
-    iResult = connect( ConnectSocket,(struct sockaddr*)&servAddr,
-                  sizeof(servAddr));
-    if (iResult == -1) {
-        printf("Connection failed\n");
-        return 0;
-    }
+    do{
+
+        PromtForServer(ipaddress);
+        servAddr.sin_family = AF_INET;
+        servAddr.sin_port= htons(DEFAULT_PORT); // use some unused port number
+        servAddr.sin_addr.s_addr = inet_addr(ipaddress);
+
+        // Connect to server.
+        iResult = connect( ConnectSocket,(struct sockaddr*)&servAddr,
+                    sizeof(servAddr));
+        if (iResult == -1) {
+            printf("Connection failed, Please try again\n");
+        }
+
+    }while(iResult == -1);
+
 
     
 
@@ -89,4 +90,24 @@ static void* WritingThread(void *arg)
         memset(sendbuf,0,sizeof(sendbuf));
     }
     return 0;
-} 
+}
+
+void PromtForServer(char * ipaddr)
+{
+    FILE *fptr;
+    char myString[10][DEFAULT_BUFLEN];
+    char userinput[DEFAULT_BUFLEN];
+    int loop = 0;
+
+    printf("Select Server to connect:\n");
+    fptr = fopen("../Server_config/server_lists.ini", "r"); 
+
+    while(fgets(myString[loop], DEFAULT_BUFLEN, fptr)) {
+        printf("%d: %s\n", loop,myString[loop]);
+        loop++;
+    }
+    fclose(fptr);
+    fgets(userinput, sizeof(userinput), stdin);
+    
+    strcpy(ipaddr,myString[atoi(userinput)]);
+}

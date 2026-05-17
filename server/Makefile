@@ -3,6 +3,13 @@ CC = gcc
 CFLAGS = -Wall -Wextra -std=c11 -Iinclude -Wno-implicit
 LDFLAGS = -lpthread 
 
+# makefile flag
+ENABLE_DEBUG ?= 0
+
+ifeq ($(ENABLE_DEBUG), 1)
+    CFLAGS += -ggdb
+endif
+
 # Directories
 SRC_DIR = src
 OBJ_DIR = obj

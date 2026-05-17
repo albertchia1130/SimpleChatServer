@@ -13,6 +13,7 @@
 #define messageSize 255
 
 typedef struct ClientAttr{
+    char  Name[10];
     struct ClientAttr* nextClient;
     int ClientID;
 
@@ -66,10 +67,10 @@ static void* ClientMessageFunc(void *arg)
     {
         memset(serMsg, 0, (255*sizeof(char)));
         readStatus = read(SocketId, serMsg, sizeof(serMsg), MSG_OOB);
-        if(readStatus<0)
+        if(readStatus <= 0)
         {
             printf("Client Has Exited\n");
-            free(Client);
+            FreeNDetachClient(Client);
             pthread_exit(0);
         }
         BroadcastMessage( SocketId, serMsg);
@@ -80,30 +81,25 @@ static void* ClientMessageFunc(void *arg)
 int CreateNAttachClient(int clientSocket)
 {
     pthread_t thread_id;
-    int number= 0;
     Client_number* ClientNumber;
     Client_number* Index = HeadListofClient;
     ClientNumber = (Client_number *)calloc(1,sizeof(Client_number));
     ClientNumber->ClientID = clientSocket;
     if(Index == NULL)
     {
-        printf("Attached at head\n");
         HeadListofClient = ClientNumber; //Attached to the list
     }
     else
     {
         while(Index != NULL)
         {
-            number++;
             if (Index->nextClient ==NULL)
             {
-                printf("Attached at %d\n", number);
                 Index->nextClient = ClientNumber; //Attach Client to the list.
                 break;
             }
             else
             {
-                printf("loop at %d\n", number);
                 Index  = Index->nextClient;
             }
         }
@@ -126,6 +122,7 @@ int FreeNDetachClient(Client_number* Client)
         {
             Index->nextClient = Client->nextClient; //Detach Client from the list.
             free(Client);
+            printf("Chat has deleted users:\n");
             break;
         }
         else if(Index->nextClient != NULL)
@@ -150,7 +147,6 @@ void BroadcastMessage(int user, char* Message)
     strcat(SendMessage,Message);
     while(Index != NULL)
     {
-        printf("messageSent\n");
         send( Index->ClientID, SendMessage, strlen(SendMessage), 0 );
         if (Index->nextClient ==NULL)
         {
