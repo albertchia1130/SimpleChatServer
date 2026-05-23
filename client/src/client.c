@@ -19,6 +19,7 @@ int ConnectSocket;
 static void*  ReadingThread(void *arg);
 static void*  WritingThread(void *arg);
 void PromtForServer(char * ipaddr);
+int CreateAccount();
 
 int main() 
 {
@@ -51,8 +52,12 @@ int main()
 
     printf("Connection Succeded\n");
 
-    pthread_create(&reading_thread_id, NULL, &ReadingThread,NULL);
-    pthread_create(&writing_thread_id, NULL, &WritingThread,NULL);
+    if(CreateAccount() == 0){
+
+        pthread_create(&reading_thread_id, NULL, &ReadingThread,NULL);
+        pthread_create(&writing_thread_id, NULL, &WritingThread,NULL);
+    }
+
 
 
     pthread_join(reading_thread_id, NULL);
@@ -110,4 +115,19 @@ void PromtForServer(char * ipaddr)
     fgets(userinput, sizeof(userinput), stdin);
     
     strcpy(ipaddr,myString[atoi(userinput)]);
+}
+
+int CreateAccount()
+{
+    int SyncStat = 0;
+    char serMsg[DEFAULT_BUFLEN];
+
+    SyncStat = recv(ConnectSocket, serMsg, sizeof(serMsg), 0);
+    if (SyncStat <= 0) {
+        printf("server error"); 
+    }
+    printf("%s\n",serMsg);
+
+
+    return SyncStat;
 }
